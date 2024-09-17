@@ -10,6 +10,7 @@ export const HeaderContainer = styled.header`
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: relative;
+  margin-bottom: -20px;
   box-sizing: border-box;  /* Garante que padding não afete a largura total */
 `;
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import Header from "../../components/header/Header";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 import Product from "../../components/product/Product"; // Importando o componente reutilizável
 import FilterSidebar from "../../components/filters/FilterSidebar"; // Sidebar de Filtros
 import Banner from "../../components/banner/Banner";
@@ -48,7 +48,10 @@ function Home() {
       redirect: "follow",
     };
 
-    fetch(`https://api.spartacusprimetobacco.com.br/api/produtos/`, requestOptions)
+    fetch(
+      `https://api.spartacusprimetobacco.com.br/api/produtos/`,
+      requestOptions
+    )
       .then((response) => response.json())
       .then((result) => {
         const mappedProducts = result.map((product) => ({
@@ -103,13 +106,14 @@ function Home() {
           <div>
             <TitleWithGoldenBar>Produtos em destaque</TitleWithGoldenBar>
             <ProductList>
-              {products.map((product) => (
+              {products.slice(0, 6).map((product) => (
                 <Product
                   key={product.id}
                   id={product.id} // Passa o id correto para navegação
                   name={product.name}
-                  price={product.price}
-                  unit={product.unit}
+                  price={`R$ ${Number(product.price).toFixed(2)}/${
+                    product.unit
+                  }`} // Corrigido para mostrar duas casas decimais
                   image={product.image}
                 />
               ))}
@@ -137,14 +141,15 @@ function Home() {
               transition={{ duration: 0.8 }}
             >
               <CarouselProductList>
-                {products.map((product) => (
+                {products.slice(0, 6).map((product) => (
                   <motion.div className="itemProduct" key={product.id}>
                     <Product
                       key={product.id}
                       id={product.id} // Passa o id correto
                       name={product.name}
-                      price={product.price}
-                      unit={product.unit}
+                      price={`R$ ${Number(product.price).toFixed(2)}/${
+                        product.unit
+                      }`} // Corrigido para mostrar duas casas decimais
                       image={product.image}
                     />
                   </motion.div>

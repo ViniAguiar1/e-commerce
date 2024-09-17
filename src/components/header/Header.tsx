@@ -4,7 +4,9 @@ import { HeaderContainer, Logo, NavLinks, NavLinkItem, SearchBar, IconContainer,
 const Header: React.FC = () => {
   return (
     <HeaderContainer>
-      <Logo>HX</Logo>
+      <Logo>
+        <img style={{ width: '100px', height: '100px' }} src='/img/logo-test.png'></img>
+      </Logo>
       <NavLinks>
         <NavLinkItem href='/home' >Home</NavLinkItem>
         <NavLinkItem>Categorias</NavLinkItem>
