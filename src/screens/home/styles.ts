@@ -96,3 +96,19 @@ export const CarouselProductList = styled.div`
     display: none;
   }
 `;
+export const TitleWithGoldenBar = styled.h2`
+  position: relative;
+  font-size: 24px;
+  font-weight: bold;
+  padding-left: 20px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 5px;
+    height: 100%;
+    background-color: #d4af37;
+  }
+`;

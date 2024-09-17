@@ -6,7 +6,7 @@ const Header: React.FC = () => {
     <HeaderContainer>
       <Logo>HX</Logo>
       <NavLinks>
-        <NavLinkItem>Home</NavLinkItem>
+        <NavLinkItem href='/home' >Home</NavLinkItem>
         <NavLinkItem>Categorias</NavLinkItem>
         <NavLinkItem>Ofertas</NavLinkItem>
         <NavLinkItem>Login</NavLinkItem>
