@@ -1,53 +1,69 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
-import './App.css';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import "./App.css";
 
 function App() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
-    try {
-      const response = await fetch('https://api.spartacusprimetobacco.com.br/api/usuarios/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to login');
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Login realizado com sucesso!',
-          text: 'Você será redirecionado para a página inicial.',
-        });
-        navigate('/home');
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Erro de autenticação',
-          text: 'Credenciais inválidas, por favor tente novamente.',
-        });
-      }
-    } catch(error) {
-      console.error(error); // Opcional: Logar o erro no console
-    
+  function handleLogin() {
+    if (!email || !password) {
       Swal.fire({
-        icon: 'error',
-        title: 'Erro',
-        text: `Ocorreu um erro: ${error.message}. Tente novamente mais tarde.`,
+        icon: "warning",
+        title: "Campos incompletos",
+        text: "Por favor, preencha todos os campos!",
       });
+      return;
     }
-  };
+
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    const raw = JSON.stringify({
+      email: email,
+      senha: password,
+    });
+
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+
+    fetch("https://api.spartacusprimetobacco.com.br/api/usuarios/login", requestOptions)
+      .then((response) => response.json())  // Use .json() para decodificar o retorno da API
+      .then((result) => {
+        console.log(result);  // Checar o resultado no console
+        if (result.status === 1) {
+          Swal.fire({
+            icon: "success",
+            title: "Login bem-sucedido",
+            text: "Redirecionando para a página inicial...",
+            timer: 1500,
+            showConfirmButton: false,
+          }).then(() => {
+            navigate("/home");
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Erro no login",
+            text: "Credenciais incorretas. Tente novamente!",
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Erro:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Erro no servidor",
+          text: "Houve um erro ao se conectar ao servidor. Tente novamente mais tarde.",
+        });
+      });
+  }
 
   return (
     <div className="login-container">

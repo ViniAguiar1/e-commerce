@@ -33,8 +33,27 @@ const banners = [
 function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [products, setProducts] = useState([]);
+  const [cartItems, setCartItems] = useState(0); // Estado para o carrinho
   const carousel = useRef();
   const [width, setWidth] = useState(0);
+
+  // Recupera o número de itens do Local Storage quando a página é carregada
+  useEffect(() => {
+    const savedCartItems = localStorage.getItem("cartItems");
+    if (savedCartItems) {
+      setCartItems(JSON.parse(savedCartItems));
+    }
+  }, []);
+
+  // Salva o número de itens no Local Storage sempre que o estado mudar
+  useEffect(() => {
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  // Função para adicionar item ao carrinho
+  const addToCart = () => {
+    setCartItems(cartItems + 1);
+  };
 
   // Fetch de produtos da API
   function carregaProdutos() {
@@ -90,7 +109,8 @@ function Home() {
 
   return (
     <>
-      <Header />
+      {/* Passando o número de itens no carrinho para o Header */}
+      <Header cartItems={cartItems} />
       <CarouselContainer>
         {banners.map((banner, index) => (
           <Slide key={banner.id} active={index === currentSlide}>
@@ -115,6 +135,7 @@ function Home() {
                     product.unit
                   }`} // Corrigido para mostrar duas casas decimais
                   image={product.image}
+                  addToCart={addToCart} // Adicionando produto ao carrinho
                 />
               ))}
             </ProductList>
@@ -151,6 +172,7 @@ function Home() {
                         product.unit
                       }`} // Corrigido para mostrar duas casas decimais
                       image={product.image}
+                      addToCart={addToCart} // Adicionando produto ao carrinho
                     />
                   </motion.div>
                 ))}

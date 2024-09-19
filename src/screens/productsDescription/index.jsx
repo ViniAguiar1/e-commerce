@@ -203,6 +203,7 @@ function ProductDescriptionPage() {
   const [products, setProducts] = useState([]);
   const carousel = useRef();
   const [width, setWidth] = useState(0);
+  const [cartItems, setCartItems] = useState(0);
 
   // Função genérica para busca de produtos
   function fetchProducts(productId = null) {
@@ -226,6 +227,101 @@ function ProductDescriptionPage() {
       .then((response) => response.json())
       .catch((error) => {
         console.error("Erro ao buscar produtos:", error);
+        throw error;
+      });
+  }
+
+  function addToCart() {
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    // Primeiro, cria o carrinho chamando newCart
+    newCart().then(() => {
+      // Após criar o carrinho, adiciona o item
+      const raw = JSON.stringify({
+        pedidoCARRINHO: 1,
+        usuarioCARRINHO: 1,
+        produtoCARRINHO: product.codigoPRODUTO,
+        custoCARRINHO: product.custoPRODUTO || 0, // Valor padrão se não houver custo definido
+        precoCARRINHO: product.precoPRODUTO,
+        quantidadeCARRINHO: 1,
+        totalCARRINHO: product.precoPRODUTO * 1,
+        nomeProdutoCARRINHO: product.nomePRODUTO,
+        ativoCARRINHO: true,
+      });
+
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: raw,
+        redirect: "follow",
+      };
+
+      fetch(
+        "https://api.spartacusprimetobacco.com.br/api/itens-carrinho",
+        requestOptions
+      )
+        .then((response) => response.json())
+        .then((result) => {
+          console.log(result);
+          setCartItems(cartItems + 1); // Incrementa os itens no carrinho
+        })
+        .catch((error) => console.error(error));
+    });
+  }
+
+  function newCart() {
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    const raw = JSON.stringify({
+      usuarioCARRINHO: 1,
+      localizacaoPEDIDO: "São Paulo",
+      preferenciaPEDIDO: "Nenhuma",
+      referenciaexternaPEDIDO: "REF12345",
+      tituloPEDIDO: "Pedido Exemplo",
+      documentoPEDIDO: "12345678900",
+      areaTelefonePEDIDO: "11",
+      telefonePEDIDO: "987654321",
+      nomePEDIDO: "João",
+      sobrenomePEDIDO: "Silva",
+      emailPEDIDO: "joao@example.com",
+      ruaPEDIDO: "Rua Exemplo",
+      numeroPEDIDO: "123",
+      complementoPEDIDO: "Apto 45",
+      cepPEDIDO: "01000-000",
+      bairroPEDIDO: "Centro",
+      precoPEDIDO: 100,
+      fretePEDIDO: 10,
+      totalPEDIDO: 110,
+      linhaPEDIDO: 1,
+      statusPEDIDO: 0,
+      linkPagamentoPEDIDO: "http://pagamento.com/link",
+      datacriacaoPEDIDO: new Date().toISOString(),
+      funcionarioPEDIDO: 2,
+      recebidoPEDIDO: new Date().toISOString(),
+      recebimentoPEDIDO: 1,
+      ativoPEDIDO: true,
+    });
+
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+
+    return fetch(
+      "https://api.spartacusprimetobacco.com.br/api/carrinho",
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((result) => {
+        console.log(result);
+        return result;
+      })
+      .catch((error) => {
+        console.error(error);
         throw error;
       });
   }
@@ -271,7 +367,7 @@ function ProductDescriptionPage() {
 
   return (
     <>
-      <Header />
+      <Header cartItems={cartItems} />
       <Container>
         <ImageSection>
           <img src={product.imagemPRODUTO} alt={product.nomePRODUTO} />
@@ -286,12 +382,16 @@ function ProductDescriptionPage() {
           </ProductRating>
           <ProductDescription>{product.descricaoPRODUTO}</ProductDescription>
           <ProductPriceBox>
-            <span className="price">R$ {product.precoPRODUTO}</span>
-            <BuyButton>
+            <span className="price">
+              R$ {Number(product.precoPRODUTO).toFixed(2)}
+            </span>
+
+            <BuyButton onClick={addToCart}>
               <FaShoppingCart />
               Comprar
             </BuyButton>
           </ProductPriceBox>
+
           <DividerLine />
         </InfoSection>
       </Container>
@@ -323,8 +423,8 @@ function ProductDescriptionPage() {
           <div className="right">
             <p>
               Lorem Ipsum is simply dummy text of the printing and typesetting
-              industry. Lorem Ipsum has been the industry's standard dummy text
-              ever since the 1500s.
+              industry. Lorem Ipsum has been the standard dummy text ever since
+              the 1500s.
             </p>
           </div>
         </SensationsBox>
@@ -339,7 +439,7 @@ function ProductDescriptionPage() {
           marginBottom: 20,
         }}
       >
-        <CarouselWeekContainer>
+        <CarouselWeekContainer style={{ marginLeft: 35 }}>
           <TitleWithGoldenBar>Promoções da Semana</TitleWithGoldenBar>
           <motion.div
             ref={carousel}
