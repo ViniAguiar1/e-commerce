@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import Header from "../../components/header/Header";
-import styled from "styled-components";
-import { FaShoppingCart, FaStar } from "react-icons/fa";
+import styled, { keyframes } from "styled-components";
+import { FaShoppingCart, FaStar, FaSpinner } from "react-icons/fa";
 import {
   CarouselProductList,
   CarouselWeekContainer,
@@ -12,6 +12,41 @@ import {
 import { motion } from "framer-motion";
 import Product from "../../components/product/Product";
 import FooterFAQ from "../../components/footer/FooterFAQ";
+import NotFound from "../404";
+
+// Animação de rotação para o ícone de carregamento
+const spin = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`;
+
+// Estilo da tela de carregamento
+const LoadingScreen = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f9f9f9; // cor suave de fundo
+`;
+
+// Ícone de carregamento estilizado
+const Spinner = styled(FaSpinner)`
+  font-size: 48px;
+  color: #27ae60; // cor principal do site
+  animation: ${spin} 1s linear infinite;
+`;
+
+// Texto de carregamento
+const LoadingText = styled.p`
+  margin-left: 15px;
+  font-size: 18px;
+  color: #666;
+  font-weight: bold;
+`;
 
 // Container geral da página
 const Container = styled.div`
@@ -25,7 +60,7 @@ const Container = styled.div`
 const DividerLine = styled.hr`
   border: 0;
   height: 1px;
-  background-color: #d1d1d1; /* Cor da linha */
+  background-color: #d1d1d1;
   margin: 20px 0;
 `;
 
@@ -358,11 +393,16 @@ function ProductDescriptionPage() {
   }, [products]);
 
   if (loading) {
-    return <div>Carregando...</div>;
+    return (
+      <LoadingScreen>
+        <Spinner />
+        <LoadingText>Carregando...</LoadingText>
+      </LoadingScreen>
+    );
   }
 
   if (error || !product) {
-    return <div>Produto não encontrado</div>;
+    return <div><NotFound /></div>;
   }
 
   return (

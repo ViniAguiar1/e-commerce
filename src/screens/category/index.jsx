@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion"; // Importação do framer-motion
 import Header from "../../components/header/Header";
 import styled from "styled-components";
 import Ronaldo from "../../../public/img/fenomeno.png";
@@ -7,6 +8,8 @@ import FooterFAQ from "../../components/footer/FooterFAQ";
 import Kaka from "../../../public/img/kaka.png";
 import Dorival from "../../../public/img/dorival.png";
 import Product from "../../components/product/Product"; // Importa o componente Product
+import { CarouselProductList, CarouselWeekContainer, TitleWithGoldenBar } from "../home/styles";
+import Banner from "../../components/banner/Banner";
 
 // Estilos do banner
 const BannerContainer = styled.div`
@@ -108,7 +111,6 @@ const SortBy = styled.select`
   border: 1px solid #ddd;
 `;
 
-// Estilos dos novos cards (semelhantes ao exemplo fornecido)
 const CardSection = styled.div`
   display: flex;
   justify-content: space-between;
@@ -136,7 +138,6 @@ const CardOverlay = styled.div`
   background-color: rgba(0, 0, 0, 0.273);
   border-radius: 10px;
   padding: 10px;
-  /* margin-bottom: 5px; */
 `;
 
 const CardTitle = styled.h3`
@@ -163,10 +164,31 @@ const DiscountBadge = styled.div`
   margin-top: 70%; /* Diminuindo o valor da margem superior */
 `;
 
+const CarouselContainer = styled.div`
+  overflow: hidden;
+  width: 100%;
+`;
+
 function Category() {
   const [categorias, setCategorias] = useState([]);
   const [produtos, setProdutos] = useState([]);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState(null);
+  const carousel = useRef(null); // Definição do ref para o carrossel
+  const [width, setWidth] = useState(0); // Estado para a largura do carrossel
+
+  useEffect(() => {
+    carregaCategorias();
+    carregaProdutos();
+  }, []);
+
+  useEffect(() => {
+    // Calcula a largura do carrossel para definir as restrições de arrasto
+    if (carousel.current) {
+      const carouselWidth = carousel.current.scrollWidth;
+      const containerWidth = carousel.current.offsetWidth;
+      setWidth(carouselWidth - containerWidth);
+    }
+  }, [produtos]);
 
   function carregaCategorias() {
     fetch("https://api.spartacusprimetobacco.com.br/api/categorias")
@@ -194,16 +216,17 @@ function Category() {
           price: parseFloat(produto.precoPRODUTO).toFixed(2),
           image: produto.imagemPRODUTO,
           categoria: produto.categoriaPRODUTO,
+          unit: "unidade", // Adicionando a unidade padrão
         }));
         setProdutos(mappedProducts);
       })
       .catch((error) => console.error(error));
   }
 
-  useEffect(() => {
-    carregaCategorias();
-    carregaProdutos();
-  }, []);
+  // Função para adicionar produtos ao carrinho
+  const addToCart = (produto) => {
+    console.log(`Produto adicionado: ${produto.name}`);
+  };
 
   const produtosFiltrados = categoriaSelecionada
     ? produtos.filter((produto) => produto.categoria === categoriaSelecionada)
@@ -243,22 +266,23 @@ function Category() {
           <FiltersContainer>
             <h2>Produtos</h2>
             <SortBy>
-              <option value="popularity">Popularity</option>
-              <option value="price-low-high">Price: Low to High</option>
-              <option value="price-high-low">Price: High to Low</option>
+              <option value="popularity">Popularidade</option>
+              <option value="price-low-high">Preço: Menor para o Maior</option>
+              <option value="price-high-low">Preço: Maior para o Menor</option>
             </SortBy>
           </FiltersContainer>
 
           <ProductsGrid>
             {produtosFiltrados.length > 0 ? (
               produtosFiltrados.map((produto) => (
-                <Product // Utilizando o componente Product para navegação
+                <Product
                   key={produto.id}
                   id={produto.id}
                   name={produto.name}
                   price={produto.price}
                   image={produto.image}
-                  unit="unidade"
+                  unit={produto.unit}
+                  addToCart={() => addToCart(produto)} // Passando a função correta
                 />
               ))
             ) : (
@@ -302,6 +326,52 @@ function Category() {
           </Card>
         </CardSection>
       </PageContainer>
+
+      <CarouselWeekContainer style={{ marginLeft: 45, marginRight: 15, maxWidth: '1300px'}}>
+        {/* Carrossel da Semana sem setas, apenas rolagem */}
+        <TitleWithGoldenBar>Promoções da Semana</TitleWithGoldenBar>
+        <CarouselContainer ref={carousel}>
+          <motion.div
+            className="inner"
+            drag="x"
+            dragConstraints={{ right: 0, left: -width }}
+            initial={{ x: 150 }}
+            animate={{ x: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <CarouselProductList>
+              {produtos.slice(0, 6).map((produto) => (
+                <motion.div className="itemProduct" key={produto.id}>
+                  <Product
+                    id={produto.id}
+                    name={produto.name}
+                    price={`R$ ${Number(produto.price).toFixed(2)}/${produto.unit}`} 
+                    image={produto.image}
+                    addToCart={() => addToCart(produto)}
+                  />
+                </motion.div>
+              ))}
+            </CarouselProductList>
+          </motion.div>
+        </CarouselContainer>
+      </CarouselWeekContainer>
+
+      <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 25,
+            marginTop: 15,
+            maxWidth: "1300px",
+            marginLeft: 25,
+            marginRight: 25,
+            marginBottom: 25
+          }}
+        >
+          <Banner />
+          <Banner />
+        </div>
+
       <FooterFAQ />
     </>
   );

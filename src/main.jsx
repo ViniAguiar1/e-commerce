@@ -6,6 +6,8 @@ import Home from './screens/home/index';
 import ProductDescription from './screens/productsDescription/index';
 import Cart from './screens/cart/index';
 import Category from './screens/category';
+import NotFound from './screens/404/index';  // Importa a tela de NotFound
+import Sales from './screens/sales/index.jsx';
 
 const Root = () => {
   const [cartItems, setCartItems] = React.useState(0);
@@ -22,6 +24,8 @@ const Root = () => {
         <Route path="/productsDescription/:id" element={<ProductDescription cartItems={cartItems} addToCart={addToCart} />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/category" element={<Category />} />
+        <Route path="/sales" element={<Sales />} />
+        <Route path="*" element={<NotFound />} />  {/* Rota NotFound */}
       </Routes>
     </BrowserRouter>
   );
